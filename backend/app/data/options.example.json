@@ -1,0 +1,35 @@
+{
+  "companies": [
+    "Example Company AS",
+    "Example Company Sweden AB",
+    "Example Company Denmark ApS"
+  ],
+  "departments": [
+    "IT",
+    "Finance",
+    "Sales",
+    "HR",
+    "Operations"
+  ],
+  "office_locations": [
+    "Oslo",
+    "Stockholm",
+    "Copenhagen",
+    "Remote"
+  ],
+  "employee_types": [
+    "Fast",
+    "Midlertidig",
+    "Konsulent"
+  ],
+  "pc_models": [
+    "Standard laptop",
+    "Developer laptop",
+    "Manager laptop"
+  ],
+  "mobile_subscriptions": [
+    "Standard mobile",
+    "Data plus",
+    "None"
+  ]
+}
