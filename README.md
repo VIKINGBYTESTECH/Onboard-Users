@@ -115,6 +115,30 @@ HTTPS=true ./scripts/run-dev.sh
 
 The script creates a self-signed development certificate in `.certs/`. Your browser will warn the first time because the certificate is local and self-signed.
 
+## Run As A Service
+
+On Linux with systemd, install the app as a user service so it starts again after reboot:
+
+```bash
+./scripts/install-service.sh
+```
+
+The service uses HTTPS by default and serves `https://localhost:5174`.
+
+Useful commands:
+
+```bash
+systemctl --user status onboard-users.service
+journalctl --user -u onboard-users.service -f
+systemctl --user restart onboard-users.service
+```
+
+To remove the service:
+
+```bash
+./scripts/uninstall-service.sh
+```
+
 The installer creates local ignored config files, installs dependencies, and asks for Entra values. Leave Entra fields empty for preview-only mode.
 
 You can also start the app without completing CLI setup. If `backend/.setup-complete` is missing, the frontend shows a first-run setup wizard that writes:
