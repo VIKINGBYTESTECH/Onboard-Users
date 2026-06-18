@@ -4,7 +4,7 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException
 from fastapi import Depends
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 
 from .admin_auth import require_user_administrator
 from .config import get_settings
@@ -179,6 +179,15 @@ def post_setup_reopen() -> SetupStatus:
         return reopen_setup(settings)
     except PermissionError as exc:
         raise HTTPException(status_code=403, detail=str(exc)) from exc
+
+
+@app.get("/setup/reopen")
+def get_setup_reopen() -> RedirectResponse:
+    try:
+        reopen_setup(settings)
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
+    return RedirectResponse(settings.frontend_origin)
 
 
 @app.get("/api/admin/options", response_model=OnboardingOptions)

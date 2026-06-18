@@ -293,6 +293,8 @@ User Administrator
 
 Click `Åpne setup wizard` on the Admin page. The app will reopen the setup wizard so you can enter the Entra values without deleting files manually.
 
+If the browser shows a certificate warning for port `8010`, continue through the warning. The local HTTPS certificate is self-signed.
+
 ### Real provisioning fails
 
 Check:

@@ -222,7 +222,6 @@ function App() {
           <AdminPage
             config={config}
             onOptionsSaved={(saved) => setOptions(saved)}
-            onSetupReopened={(status) => setSetupStatus(status)}
           />
         ) : (
       <section className="layout">
@@ -490,11 +489,9 @@ function SetupWizard({ initialOptions, onSaved }: { initialOptions: Options; onS
 function AdminPage({
   config,
   onOptionsSaved,
-  onSetupReopened,
 }: {
   config: Config | null;
   onOptionsSaved: (options: Options) => void;
-  onSetupReopened: (status: SetupStatus) => void;
 }) {
   const [account, setAccount] = useState<AccountInfo | null>(null);
   const [token, setToken] = useState("");
@@ -539,17 +536,6 @@ function AdminPage({
     setMessage("Valgene er lagret.");
   }
 
-  async function reopenSetup() {
-    setError("");
-    setMessage("");
-    try {
-      const status = await api<SetupStatus>("/api/setup/reopen", { method: "POST" });
-      onSetupReopened(status);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    }
-  }
-
   return (
     <section className="admin-layout">
       <section className="panel admin-panel">
@@ -566,10 +552,10 @@ function AdminPage({
         {!authReady && (
           <div className="warning admin-warning">
             <span>Sett `ENTRA_TENANT_ID` og `ENTRA_CLIENT_ID` i backend for å aktivere admin-login.</span>
-            <button className="secondary" onClick={reopenSetup}>
+            <a className="secondary help-link" href={`${API_BASE}/setup/reopen`}>
               <RefreshCw size={17} />
               Åpne setup wizard
-            </button>
+            </a>
           </div>
         )}
         {error && <div className="error">{error}</div>}
