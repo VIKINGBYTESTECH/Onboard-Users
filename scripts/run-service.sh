@@ -19,10 +19,8 @@ if [ ! -d "$FRONTEND_DIR/node_modules" ]; then
   exit 1
 fi
 
-if [ ! -d "$FRONTEND_DIR/dist" ]; then
-  cd "$FRONTEND_DIR"
-  npm run build
-fi
+cd "$FRONTEND_DIR"
+npm run build
 
 cleanup() {
   if [ -n "${BACKEND_PID:-}" ]; then

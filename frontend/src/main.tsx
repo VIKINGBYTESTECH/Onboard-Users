@@ -120,6 +120,11 @@ async function api<T>(path: string, options: RequestInit = {}, token?: string): 
     },
   });
   if (!res.ok) throw new Error(await res.text());
+  const contentType = res.headers.get("content-type") || "";
+  if (!contentType.includes("application/json")) {
+    const text = await res.text();
+    throw new Error(`Forventet JSON fra ${path}, men fikk: ${text.slice(0, 180)}`);
+  }
   return res.json();
 }
 
@@ -220,6 +225,7 @@ function App() {
           <AdminPage
             config={config}
             onOptionsSaved={(saved) => setOptions(saved)}
+            onSetupReopened={(status) => setSetupStatus(status)}
           />
         ) : (
       <section className="layout">
@@ -487,9 +493,11 @@ function SetupWizard({ initialOptions, onSaved }: { initialOptions: Options; onS
 function AdminPage({
   config,
   onOptionsSaved,
+  onSetupReopened,
 }: {
   config: Config | null;
   onOptionsSaved: (options: Options) => void;
+  onSetupReopened: (status: SetupStatus) => void;
 }) {
   const [account, setAccount] = useState<AccountInfo | null>(null);
   const [token, setToken] = useState("");
@@ -534,6 +542,17 @@ function AdminPage({
     setMessage("Valgene er lagret.");
   }
 
+  async function reopenSetup() {
+    setError("");
+    setMessage("");
+    try {
+      const status = await api<SetupStatus>("/api/setup/reopen", { method: "POST" });
+      onSetupReopened(status);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    }
+  }
+
   return (
     <section className="admin-layout">
       <section className="panel admin-panel">
@@ -550,13 +569,10 @@ function AdminPage({
         {!authReady && (
           <div className="warning admin-warning">
             <span>Sett `ENTRA_TENANT_ID` og `ENTRA_CLIENT_ID` i backend for å aktivere admin-login.</span>
-            <a
-              className="secondary help-link"
-              href={`${API_BASE}/setup/reopen?return_to=${encodeURIComponent(window.location.origin)}`}
-            >
+            <button className="secondary" onClick={reopenSetup}>
               <RefreshCw size={17} />
               Åpne setup wizard
-            </a>
+            </button>
           </div>
         )}
         {error && <div className="error">{error}</div>}
