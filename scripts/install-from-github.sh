@@ -5,17 +5,19 @@ REPO_URL="${REPO_URL:-https://github.com/VIKINGBYTESTECH/Onboard-Users}"
 BRANCH="${BRANCH:-main}"
 TARGET_DIR="${TARGET_DIR:-onboard-users}"
 RUN_INSTALL="${RUN_INSTALL:-true}"
+RUN_SERVICE="${RUN_SERVICE:-true}"
 TARGET_WAS_DEFAULT="true"
 
 usage() {
   cat <<EOF
-Usage: install-from-github.sh [--target DIR] [--branch BRANCH] [--no-install]
+Usage: install-from-github.sh [--target DIR] [--branch BRANCH] [--no-install] [--no-service]
 
 Environment overrides:
   REPO_URL     GitHub repository URL
   BRANCH       Branch to download
   TARGET_DIR   Destination directory
   RUN_INSTALL  true/false
+  RUN_SERVICE  true/false
 EOF
 }
 
@@ -32,6 +34,11 @@ while [ "$#" -gt 0 ]; do
       ;;
     --no-install)
       RUN_INSTALL="false"
+      RUN_SERVICE="false"
+      shift
+      ;;
+    --no-service)
+      RUN_SERVICE="false"
       shift
       ;;
     -h|--help)
@@ -103,6 +110,18 @@ echo "Downloaded to $TARGET_DIR"
 
 if [ "$RUN_INSTALL" = "true" ]; then
   ./scripts/install.sh
+  if [ "$RUN_SERVICE" = "true" ]; then
+    if command -v systemctl >/dev/null 2>&1; then
+      ./scripts/install-service.sh
+    else
+      echo "systemctl not found; skipping automatic service setup."
+      echo "Start manually with:"
+      echo "  cd $TARGET_DIR && HTTPS=true ./scripts/run-dev.sh"
+    fi
+  else
+    echo "Skipped service setup. Start manually with:"
+    echo "  cd $TARGET_DIR && HTTPS=true ./scripts/run-dev.sh"
+  fi
 else
   echo "Skipped install. Run later with:"
   echo "  cd $TARGET_DIR && ./scripts/install.sh"

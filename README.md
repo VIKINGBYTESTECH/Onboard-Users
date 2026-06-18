@@ -91,11 +91,15 @@ No Git required:
 ```bash
 cd ~
 curl -fsSL https://raw.githubusercontent.com/VIKINGBYTESTECH/Onboard-Users/main/scripts/install-from-github.sh | bash
-cd onboard-users
-./scripts/run-dev.sh
 ```
 
-Run as your normal user, not with `sudo`.
+Run as your normal user, not with `sudo`. On Linux with systemd, the curl installer also installs and starts `onboard-users.service` automatically. Open `https://localhost:5174` when it finishes.
+
+To install without creating the service:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/VIKINGBYTESTECH/Onboard-Users/main/scripts/install-from-github.sh | bash -s -- --no-service
+```
 
 Most local setup is automated:
 
