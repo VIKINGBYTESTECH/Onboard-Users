@@ -41,6 +41,8 @@ ENTRA_CLIENT_ID=your-public-client-or-spa-app-client-id
 Add the app URL as a SPA redirect URI in Entra, for example:
 
 - `http://localhost:5174`
+- `https://localhost:5174` if you run local HTTPS
+- Your internal/Tailscale URL if you use one
 
 ## Microsoft Entra Setup
 
@@ -104,6 +106,14 @@ chmod +x scripts/*.sh
 ```
 
 Open `http://localhost:5174`.
+
+For local HTTPS, add `https://localhost:5174` as an Entra SPA redirect URI and start with:
+
+```bash
+HTTPS=true ./scripts/run-dev.sh
+```
+
+The script creates a self-signed development certificate in `.certs/`. Your browser will warn the first time because the certificate is local and self-signed.
 
 The installer creates local ignored config files, installs dependencies, and asks for Entra values. Leave Entra fields empty for preview-only mode.
 

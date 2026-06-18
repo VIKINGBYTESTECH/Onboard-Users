@@ -66,7 +66,7 @@ create_backend_env() {
 
   cat > "$env_file" <<EOF
 FRONTEND_ORIGIN=$frontend_origin
-FRONTEND_ORIGIN_REGEX=^http://(localhost|127\\.0\\.0\\.1|100\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}|[a-zA-Z0-9.-]+\\.ts\\.net):5174$
+FRONTEND_ORIGIN_REGEX=^https?://(localhost|127\\.0\\.0\\.1|100\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}|[a-zA-Z0-9.-]+\\.ts\\.net):5174$
 ENTRA_TENANT_ID=$tenant_id
 ENTRA_CLIENT_ID=$client_id
 ENTRA_CLIENT_SECRET=$client_secret

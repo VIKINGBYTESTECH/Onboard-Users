@@ -6,3 +6,4 @@ backend/**/*.pyc
 backend/app/data/options.json
 frontend/node_modules/
 frontend/dist/
+.certs/

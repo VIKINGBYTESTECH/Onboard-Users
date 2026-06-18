@@ -14,6 +14,7 @@ This app can run in preview mode without Entra. Configure Entra when you want:
 4. Use a single-tenant app unless you explicitly need multi-tenant.
 5. Add SPA redirect URIs for the frontend:
    - `http://localhost:5174`
+   - `https://localhost:5174` if you run local HTTPS
    - Any internal/Tailscale URL you use, for example `http://100.x.x.x:5174`
 
 Save these values:

@@ -8,7 +8,7 @@ class Settings(BaseSettings):
 
     frontend_origin: str = "http://localhost:5174"
     frontend_origin_regex: str = (
-        r"^http://("
+        r"^https?://("
         r"localhost|127\.0\.0\.1|"
         r"100\.\d{1,3}\.\d{1,3}\.\d{1,3}|"
         r"[a-zA-Z0-9.-]+\.ts\.net"
