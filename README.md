@@ -88,10 +88,13 @@ Relevant Microsoft Graph documentation:
 No Git required:
 
 ```bash
+cd ~
 curl -fsSL https://raw.githubusercontent.com/VIKINGBYTESTECH/Onboard-Users/main/scripts/install-from-github.sh | bash
 cd onboard-users
 ./scripts/run-dev.sh
 ```
+
+Run as your normal user, not with `sudo`.
 
 Most local setup is automated:
 
