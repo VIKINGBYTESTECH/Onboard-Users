@@ -40,8 +40,8 @@ ENTRA_CLIENT_ID=your-public-client-or-spa-app-client-id
 
 Add the app URL as a SPA redirect URI in Entra, for example:
 
-- `http://localhost:5174`
-- `https://localhost:5174` if you run local HTTPS
+- `https://localhost:5174`
+- `http://localhost:5174` only if you intentionally run without HTTPS
 - Your internal/Tailscale URL if you use one
 
 ## Microsoft Entra Setup
@@ -101,23 +101,23 @@ To install without creating the service:
 curl -fsSL https://raw.githubusercontent.com/VIKINGBYTESTECH/Onboard-Users/main/scripts/install-from-github.sh | bash -s -- --no-service
 ```
 
-Most local setup is automated:
+If you already downloaded the repo, run the same local install and service setup manually:
 
 ```bash
 chmod +x scripts/*.sh
 ./scripts/install.sh
-./scripts/run-dev.sh
+./scripts/install-service.sh
 ```
 
-Open `http://localhost:5174`.
+Open `https://localhost:5174`.
 
-For local HTTPS, add `https://localhost:5174` as an Entra SPA redirect URI and start with:
+For temporary development without service, start the app manually:
 
 ```bash
 HTTPS=true ./scripts/run-dev.sh
 ```
 
-The script creates a self-signed development certificate in `.certs/`. Your browser will warn the first time because the certificate is local and self-signed.
+Both service and dev mode create a self-signed development certificate in `.certs/`. Your browser will warn the first time because the certificate is local and self-signed.
 
 ## Run As A Service
 
@@ -161,32 +161,17 @@ rm backend/.setup-complete
 
 ## Manual Run
 
-Create local config files:
+Use this only for development or troubleshooting without service.
+
+Create local config files and start both backend and frontend:
 
 ```bash
 chmod +x scripts/bootstrap-local.sh
 ./scripts/bootstrap-local.sh
+HTTPS=true ./scripts/run-dev.sh
 ```
 
-Backend:
-
-```bash
-cd onboarding-app/backend
-python -m venv .venv
-. .venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8010
-```
-
-Frontend:
-
-```bash
-cd onboarding-app/frontend
-npm install
-npm run dev -- --host 0.0.0.0 --port 5174
-```
-
-Open `http://localhost:5174`.
+Open `https://localhost:5174`.
 
 ## Check Build
 

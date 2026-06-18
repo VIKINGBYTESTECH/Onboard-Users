@@ -27,4 +27,4 @@ fi
 echo
 echo "Next:"
 echo "1. Edit backend/.env with Entra tenant/client values."
-echo "2. Run backend and frontend as described in README.md."
+echo "2. Start the service with ./scripts/install-service.sh, or use HTTPS=true ./scripts/run-dev.sh for temporary development."

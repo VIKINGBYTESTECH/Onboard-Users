@@ -13,8 +13,8 @@ This app can run in preview mode without Entra. Configure Entra when you want:
 3. Create a new registration.
 4. Use a single-tenant app unless you explicitly need multi-tenant.
 5. Add SPA redirect URIs for the frontend:
-   - `http://localhost:5174`
-   - `https://localhost:5174` if you run local HTTPS
+   - `https://localhost:5174`
+   - `http://localhost:5174` only if you intentionally run without HTTPS
    - Any internal/Tailscale URL you use, for example `http://100.x.x.x:5174`
 
 Save these values:
@@ -60,13 +60,21 @@ Use least privilege in production. If you only want preview/report mode, do not 
 
 ## 4. Local Config Files
 
-Use the installer:
+Use the installer. On Linux with systemd, the curl installer starts the service automatically:
+
+```bash
+cd ~
+curl -fsSL https://raw.githubusercontent.com/VIKINGBYTESTECH/Onboard-Users/main/scripts/install-from-github.sh | bash
+```
+
+If you already downloaded the repo:
 
 ```bash
 ./scripts/install.sh
+./scripts/install-service.sh
 ```
 
-Or use the browser setup wizard. Start the backend/frontend and open the app. If `backend/.setup-complete` is missing, the wizard will collect runtime values, Entra IDs, and option lists, then write local config files.
+Or use the browser setup wizard. Start the service and open the app. If `backend/.setup-complete` is missing, the wizard will collect runtime values, Entra IDs, and option lists, then write local config files.
 
 Or create config files without installing dependencies:
 

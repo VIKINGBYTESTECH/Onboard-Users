@@ -55,7 +55,7 @@ create_backend_env() {
   echo "Backend configuration"
   echo "Leave Entra values empty to run in preview-only mode."
   local frontend_origin tenant_id client_id client_secret domain usage_location portal_url it_email
-  frontend_origin="$(prompt_default "Frontend origin" "http://localhost:5174")"
+  frontend_origin="$(prompt_default "Frontend origin" "https://localhost:5174")"
   tenant_id="$(prompt_default "Entra tenant ID" "")"
   client_id="$(prompt_default "Entra app/client ID" "")"
   client_secret="$(prompt_default "Entra client secret (optional, hidden)" "" true)"
@@ -119,8 +119,11 @@ main() {
 
   echo
   echo "Install complete."
-  echo "Run the app with:"
-  echo "  ./scripts/run-dev.sh"
+  echo "Install and start the service with:"
+  echo "  ./scripts/install-service.sh"
+  echo
+  echo "For temporary development without service:"
+  echo "  HTTPS=true ./scripts/run-dev.sh"
   echo
   echo "For Entra app registration guidance:"
   echo "  docs/ENTRA_SETUP.md"

@@ -15,7 +15,7 @@ class SetupStatus(BaseModel):
 
 
 class SetupRuntime(BaseModel):
-    frontend_origin: str = "http://localhost:5174"
+    frontend_origin: str = "https://localhost:5174"
     entra_tenant_id: str = ""
     entra_client_id: str = ""
     entra_client_secret: str = ""
