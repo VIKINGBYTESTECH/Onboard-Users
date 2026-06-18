@@ -418,24 +418,36 @@ function SetupWizard({ initialOptions, onSaved }: { initialOptions: Options; onS
         )}
 
         {step === 2 && (
-          <div className="form-grid">
-            <Field label="Entra tenant ID">
-              <input value={runtime.entra_tenant_id} onChange={(e) => patchRuntime("entra_tenant_id", e.target.value)} />
-            </Field>
-            <Field label="Entra client ID">
-              <input value={runtime.entra_client_id} onChange={(e) => patchRuntime("entra_client_id", e.target.value)} />
-            </Field>
-            <Field label="Entra client secret">
-              <input
-                type="password"
-                value={runtime.entra_client_secret}
-                onChange={(e) => patchRuntime("entra_client_secret", e.target.value)}
-              />
-            </Field>
-            <div className="setup-note">
-              La client secret stå tom for preview/admin-login uten Graph-provisjonering.
+          <>
+            <div className="setup-help-row">
+              <div>
+                <h3>Entra-oppsett</h3>
+                <p>Trenger du App Registration, redirect URI, client secret eller Graph permissions?</p>
+              </div>
+              <a className="secondary help-link" href={`${API_BASE}/help/setup`} target="_blank" rel="noreferrer">
+                <FileText size={17} />
+                Hjelp til Entra
+              </a>
             </div>
-          </div>
+            <div className="form-grid">
+              <Field label="Entra tenant ID">
+                <input value={runtime.entra_tenant_id} onChange={(e) => patchRuntime("entra_tenant_id", e.target.value)} />
+              </Field>
+              <Field label="Entra client ID">
+                <input value={runtime.entra_client_id} onChange={(e) => patchRuntime("entra_client_id", e.target.value)} />
+              </Field>
+              <Field label="Entra client secret">
+                <input
+                  type="password"
+                  value={runtime.entra_client_secret}
+                  onChange={(e) => patchRuntime("entra_client_secret", e.target.value)}
+                />
+              </Field>
+              <div className="setup-note">
+                La client secret stå tom for preview/admin-login uten Graph-provisjonering.
+              </div>
+            </div>
+          </>
         )}
 
         {step === 3 && (
