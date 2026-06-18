@@ -15,7 +15,10 @@ import {
 import { PublicClientApplication, type AccountInfo } from "@azure/msal-browser";
 import "./styles.css";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "";
+const explicitApiBase = import.meta.env.VITE_API_BASE_URL || "";
+const inferredBackendBase = `${window.location.protocol}//${window.location.hostname}:8010`;
+const API_BASES = explicitApiBase ? [explicitApiBase] : ["", inferredBackendBase];
+const HELP_URL = explicitApiBase ? `${explicitApiBase}/help/setup` : "/help/setup";
 
 type Employee = {
   full_name: string;
@@ -111,21 +114,34 @@ const emptyEmployee: Employee = {
 };
 
 async function api<T>(path: string, options: RequestInit = {}, token?: string): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(options.headers || {}),
-    },
-  });
-  if (!res.ok) throw new Error(await res.text());
-  const contentType = res.headers.get("content-type") || "";
-  if (!contentType.includes("application/json")) {
-    const text = await res.text();
-    throw new Error(`Forventet JSON fra ${path}, men fikk: ${text.slice(0, 180)}`);
+  const errors: string[] = [];
+  for (const base of API_BASES) {
+    const url = `${base}${path}`;
+    try {
+      const res = await fetch(url, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...(options.headers || {}),
+        },
+      });
+      if (!res.ok) {
+        errors.push(`${url}: ${res.status} ${await res.text()}`);
+        continue;
+      }
+      const contentType = res.headers.get("content-type") || "";
+      if (!contentType.includes("application/json")) {
+        const text = await res.text();
+        errors.push(`${url}: forventet JSON, fikk ${text.slice(0, 120)}`);
+        continue;
+      }
+      return res.json();
+    } catch (err) {
+      errors.push(`${url}: ${err instanceof Error ? err.message : String(err)}`);
+    }
   }
-  return res.json();
+  throw new Error(errors.join("\n"));
 }
 
 function App() {
@@ -431,7 +447,7 @@ function SetupWizard({ initialOptions, onSaved }: { initialOptions: Options; onS
                 <h3>Entra-oppsett</h3>
                 <p>Trenger du App Registration, redirect URI, client secret eller Graph permissions?</p>
               </div>
-              <a className="secondary help-link" href={`${API_BASE}/help/setup`} target="_blank" rel="noreferrer">
+              <a className="secondary help-link" href={HELP_URL} target="_blank" rel="noreferrer">
                 <FileText size={17} />
                 Hjelp til Entra
               </a>
