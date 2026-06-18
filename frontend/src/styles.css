@@ -292,6 +292,17 @@ h3 {
   padding: 10px;
 }
 
+.admin-warning {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.admin-warning button {
+  flex: 0 0 auto;
+}
+
 .admin-layout {
   margin: 0 auto;
   max-width: 1120px;

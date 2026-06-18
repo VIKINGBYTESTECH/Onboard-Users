@@ -289,6 +289,10 @@ The signed-in user does not have the expected admin role claim. Assign the Entra
 User Administrator
 ```
 
+### Admin page says Entra tenant/client ID is missing
+
+Click `Åpne setup wizard` on the Admin page. The app will reopen the setup wizard so you can enter the Entra values without deleting files manually.
+
 ### Real provisioning fails
 
 Check:

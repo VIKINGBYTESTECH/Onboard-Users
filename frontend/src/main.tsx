@@ -219,7 +219,11 @@ function App() {
       ) : (
       <>
         {view === "admin" ? (
-          <AdminPage config={config} onOptionsSaved={(saved) => setOptions(saved)} />
+          <AdminPage
+            config={config}
+            onOptionsSaved={(saved) => setOptions(saved)}
+            onSetupReopened={(status) => setSetupStatus(status)}
+          />
         ) : (
       <section className="layout">
         <section className="panel form-panel">
@@ -483,7 +487,15 @@ function SetupWizard({ initialOptions, onSaved }: { initialOptions: Options; onS
   );
 }
 
-function AdminPage({ config, onOptionsSaved }: { config: Config | null; onOptionsSaved: (options: Options) => void }) {
+function AdminPage({
+  config,
+  onOptionsSaved,
+  onSetupReopened,
+}: {
+  config: Config | null;
+  onOptionsSaved: (options: Options) => void;
+  onSetupReopened: (status: SetupStatus) => void;
+}) {
   const [account, setAccount] = useState<AccountInfo | null>(null);
   const [token, setToken] = useState("");
   const [options, setOptions] = useState<Options | null>(null);
@@ -527,6 +539,17 @@ function AdminPage({ config, onOptionsSaved }: { config: Config | null; onOption
     setMessage("Valgene er lagret.");
   }
 
+  async function reopenSetup() {
+    setError("");
+    setMessage("");
+    try {
+      const status = await api<SetupStatus>("/api/setup/reopen", { method: "POST" });
+      onSetupReopened(status);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    }
+  }
+
   return (
     <section className="admin-layout">
       <section className="panel admin-panel">
@@ -541,8 +564,12 @@ function AdminPage({ config, onOptionsSaved }: { config: Config | null; onOption
           </button>
         </div>
         {!authReady && (
-          <div className="warning">
-            Sett `ENTRA_TENANT_ID` og `ENTRA_CLIENT_ID` i backend for å aktivere admin-login.
+          <div className="warning admin-warning">
+            <span>Sett `ENTRA_TENANT_ID` og `ENTRA_CLIENT_ID` i backend for å aktivere admin-login.</span>
+            <button className="secondary" onClick={reopenSetup}>
+              <RefreshCw size={17} />
+              Åpne setup wizard
+            </button>
           </div>
         )}
         {error && <div className="error">{error}</div>}

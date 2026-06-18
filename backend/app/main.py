@@ -12,7 +12,7 @@ from .graph import GraphProvisioner
 from .options import OnboardingOptions, load_options, save_options
 from .rules import STATUS_COMPLETED, STATUS_PARTIAL, STATUS_WAITING, build_report
 from .schemas import OnboardingReport, OnboardingRequest
-from .setup import SetupPayload, SetupStatus, save_setup, setup_status
+from .setup import SetupPayload, SetupStatus, reopen_setup, save_setup, setup_status
 
 settings = get_settings()
 app = FastAPI(title="IT Onboarding API")
@@ -169,6 +169,14 @@ def get_setup_status() -> SetupStatus:
 def post_setup(payload: SetupPayload) -> SetupStatus:
     try:
         return save_setup(settings, payload)
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
+
+
+@app.post("/api/setup/reopen", response_model=SetupStatus)
+def post_setup_reopen() -> SetupStatus:
+    try:
+        return reopen_setup(settings)
     except PermissionError as exc:
         raise HTTPException(status_code=403, detail=str(exc)) from exc
 
