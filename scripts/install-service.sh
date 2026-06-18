@@ -94,7 +94,8 @@ WantedBy=default.target
 EOF
 
 systemctl --user daemon-reload
-systemctl --user enable --now "$SERVICE_NAME.service"
+systemctl --user enable "$SERVICE_NAME.service"
+systemctl --user restart "$SERVICE_NAME.service"
 
 if [ "$ENABLE_LINGER" = "true" ] && command -v loginctl >/dev/null 2>&1; then
   if loginctl enable-linger "$USER" >/dev/null 2>&1; then

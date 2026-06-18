@@ -7,6 +7,7 @@ TARGET_DIR="${TARGET_DIR:-onboard-users}"
 RUN_INSTALL="${RUN_INSTALL:-true}"
 RUN_SERVICE="${RUN_SERVICE:-true}"
 TARGET_WAS_DEFAULT="true"
+UPDATE_EXISTING="false"
 
 usage() {
   cat <<EOF
@@ -86,8 +87,13 @@ if [ ! -d "$TARGET_PARENT" ] || [ ! -w "$TARGET_PARENT" ]; then
 fi
 
 if [ -e "$TARGET_DIR" ]; then
-  echo "Target already exists: $TARGET_DIR" >&2
-  exit 1
+  if [ -d "$TARGET_DIR" ]; then
+    UPDATE_EXISTING="true"
+    echo "Target already exists; updating in place: $TARGET_DIR"
+  else
+    echo "Target exists but is not a directory: $TARGET_DIR" >&2
+    exit 1
+  fi
 fi
 
 TMP_DIR="$(mktemp -d)"
@@ -101,15 +107,40 @@ echo "Downloading $ARCHIVE_URL"
 curl -fsSL "$ARCHIVE_URL" | tar -xz -C "$TMP_DIR"
 
 EXTRACTED_DIR="$(find "$TMP_DIR" -mindepth 1 -maxdepth 1 -type d | head -n 1)"
-mv "$EXTRACTED_DIR" "$TARGET_DIR"
+if [ "$UPDATE_EXISTING" = "true" ]; then
+  cp -a "$EXTRACTED_DIR/." "$TARGET_DIR/"
+else
+  mv "$EXTRACTED_DIR" "$TARGET_DIR"
+fi
 
 cd "$TARGET_DIR"
 chmod +x scripts/*.sh
 
-echo "Downloaded to $TARGET_DIR"
+if [ "$UPDATE_EXISTING" = "true" ]; then
+  echo "Updated $TARGET_DIR"
+else
+  echo "Downloaded to $TARGET_DIR"
+fi
 
 if [ "$RUN_INSTALL" = "true" ]; then
-  ./scripts/install.sh --wizard
+  if [ "$UPDATE_EXISTING" = "true" ]; then
+    if [ -x backend/.venv/bin/python ]; then
+      cd backend
+      . .venv/bin/activate
+      pip install -q -r requirements.txt
+      cd ..
+      echo "Updated backend dependencies"
+    else
+      ./scripts/install.sh --wizard
+    fi
+
+    cd frontend
+    npm install
+    cd ..
+    echo "Updated frontend dependencies"
+  else
+    ./scripts/install.sh --wizard
+  fi
   if [ "$RUN_SERVICE" = "true" ]; then
     if command -v systemctl >/dev/null 2>&1; then
       ./scripts/install-service.sh
