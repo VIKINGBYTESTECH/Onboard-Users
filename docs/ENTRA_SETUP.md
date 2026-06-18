@@ -1,5 +1,7 @@
 # Microsoft Entra Setup
 
+For the full step-by-step setup, use [HOW_TO_SETUP.md](HOW_TO_SETUP.md).
+
 This app can run in preview mode without Entra. Configure Entra when you want:
 
 - Microsoft sign-in for the admin page.

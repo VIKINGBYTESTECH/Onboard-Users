@@ -46,7 +46,7 @@ Add the app URL as a SPA redirect URI in Entra, for example:
 
 ## Microsoft Entra Setup
 
-For a detailed setup guide, see [docs/ENTRA_SETUP.md](docs/ENTRA_SETUP.md).
+For a detailed setup guide, see [docs/HOW_TO_SETUP.md](docs/HOW_TO_SETUP.md).
 
 Create an app registration in Entra ID and grant application permissions appropriate for your tenant policy, for example:
 
@@ -93,7 +93,7 @@ cd ~
 curl -fsSL https://raw.githubusercontent.com/VIKINGBYTESTECH/Onboard-Users/main/scripts/install-from-github.sh | bash
 ```
 
-Run as your normal user, not with `sudo`. On Linux with systemd, the curl installer also installs and starts `onboard-users.service` automatically. Open `https://localhost:5174` when it finishes.
+Run as your normal user, not with `sudo`. On Linux with systemd, the curl installer also installs and starts `onboard-users.service` automatically. Open `https://localhost:5174` when it finishes and complete the setup wizard.
 
 To install without creating the service:
 
@@ -143,7 +143,7 @@ To remove the service:
 ./scripts/uninstall-service.sh
 ```
 
-The installer creates local ignored config files, installs dependencies, and asks for Entra values. Leave Entra fields empty for preview-only mode.
+The installer creates local ignored runtime files and installs dependencies. Entra values are collected in the browser setup wizard. Leave the client secret empty for preview-only mode.
 
 You can also start the app without completing CLI setup. If `backend/.setup-complete` is missing, the frontend shows a first-run setup wizard that writes:
 

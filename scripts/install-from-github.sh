@@ -109,7 +109,7 @@ chmod +x scripts/*.sh
 echo "Downloaded to $TARGET_DIR"
 
 if [ "$RUN_INSTALL" = "true" ]; then
-  ./scripts/install.sh
+  ./scripts/install.sh --wizard
   if [ "$RUN_SERVICE" = "true" ]; then
     if command -v systemctl >/dev/null 2>&1; then
       ./scripts/install-service.sh

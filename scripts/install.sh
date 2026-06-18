@@ -4,6 +4,39 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BACKEND_DIR="$ROOT_DIR/backend"
 FRONTEND_DIR="$ROOT_DIR/frontend"
+SETUP_MODE="${SETUP_MODE:-wizard}"
+
+usage() {
+  cat <<EOF
+Usage: install.sh [--wizard] [--cli-config]
+
+Options:
+  --wizard      Install dependencies and let the browser setup wizard collect config (default)
+  --cli-config  Ask for config in the terminal and mark setup complete
+EOF
+}
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --wizard)
+      SETUP_MODE="wizard"
+      shift
+      ;;
+    --cli-config)
+      SETUP_MODE="cli"
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+done
 
 prompt_default() {
   local label="$1"
@@ -51,6 +84,11 @@ create_backend_env() {
     return
   fi
 
+  if [ "$SETUP_MODE" = "wizard" ]; then
+    echo "Skipping backend/.env prompts; browser setup wizard will collect config."
+    return
+  fi
+
   echo
   echo "Backend configuration"
   echo "Leave Entra values empty to run in preview-only mode."
@@ -92,7 +130,10 @@ create_runtime_files() {
     echo "Created backend/app/data/options.json"
   fi
 
-  if [ ! -f "$BACKEND_DIR/.setup-complete" ]; then
+  if [ "$SETUP_MODE" = "wizard" ]; then
+    rm -f "$BACKEND_DIR/.setup-complete"
+    echo "Setup wizard will run on first browser start"
+  elif [ ! -f "$BACKEND_DIR/.setup-complete" ]; then
     printf "complete\n" > "$BACKEND_DIR/.setup-complete"
     echo "Created backend/.setup-complete"
   fi
@@ -122,6 +163,10 @@ main() {
   echo "Install and start the service with:"
   echo "  ./scripts/install-service.sh"
   echo
+  if [ "$SETUP_MODE" = "wizard" ]; then
+    echo "Open https://localhost:5174 after service start to complete the setup wizard."
+    echo
+  fi
   echo "For temporary development without service:"
   echo "  HTTPS=true ./scripts/run-dev.sh"
   echo
