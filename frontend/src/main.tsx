@@ -552,7 +552,10 @@ function AdminPage({
         {!authReady && (
           <div className="warning admin-warning">
             <span>Sett `ENTRA_TENANT_ID` og `ENTRA_CLIENT_ID` i backend for å aktivere admin-login.</span>
-            <a className="secondary help-link" href={`${API_BASE}/setup/reopen`}>
+            <a
+              className="secondary help-link"
+              href={`${API_BASE}/setup/reopen?return_to=${encodeURIComponent(window.location.origin)}`}
+            >
               <RefreshCw size={17} />
               Åpne setup wizard
             </a>

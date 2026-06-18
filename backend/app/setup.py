@@ -73,7 +73,7 @@ def render_env(runtime: SetupRuntime) -> str:
     return "\n".join(
         [
             f"FRONTEND_ORIGIN={runtime.frontend_origin}",
-            r"FRONTEND_ORIGIN_REGEX=^https?://(localhost|127\.0\.0\.1|100\.\d{1,3}\.\d{1,3}\.\d{1,3}|[a-zA-Z0-9.-]+\.ts\.net):5174$",
+            r"FRONTEND_ORIGIN_REGEX=^https?://(localhost|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|[a-zA-Z0-9.-]+\.ts\.net):5174$",
             f"ENTRA_TENANT_ID={runtime.entra_tenant_id}",
             f"ENTRA_CLIENT_ID={runtime.entra_client_id}",
             f"ENTRA_CLIENT_SECRET={runtime.entra_client_secret}",

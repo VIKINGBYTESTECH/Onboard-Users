@@ -1,4 +1,5 @@
 import html
+import re
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
@@ -182,12 +183,18 @@ def post_setup_reopen() -> SetupStatus:
 
 
 @app.get("/setup/reopen")
-def get_setup_reopen() -> RedirectResponse:
+def get_setup_reopen(return_to: str | None = None) -> RedirectResponse:
     try:
         reopen_setup(settings)
     except PermissionError as exc:
         raise HTTPException(status_code=403, detail=str(exc)) from exc
-    return RedirectResponse(settings.frontend_origin)
+    redirect_to = settings.frontend_origin
+    if return_to and (
+        return_to == settings.frontend_origin
+        or re.fullmatch(settings.frontend_origin_regex, return_to)
+    ):
+        redirect_to = return_to
+    return RedirectResponse(redirect_to)
 
 
 @app.get("/api/admin/options", response_model=OnboardingOptions)
