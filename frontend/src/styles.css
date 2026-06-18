@@ -397,6 +397,20 @@ h3 {
   padding: 18px;
 }
 
+.login-panel {
+  align-items: flex-start;
+  display: grid;
+  gap: 14px;
+  margin: 0 auto;
+  max-width: 560px;
+  padding: 24px;
+}
+
+.login-panel p {
+  color: #65717b;
+  max-width: 480px;
+}
+
 .admin-grid {
   display: grid;
   gap: 14px;

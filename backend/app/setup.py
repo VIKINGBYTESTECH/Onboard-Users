@@ -62,6 +62,8 @@ def save_setup(settings: Settings, payload: SetupPayload) -> SetupStatus:
 def reopen_setup(settings: Settings) -> SetupStatus:
     if not settings.setup_wizard_enabled:
         raise PermissionError("Setup wizard is disabled.")
+    if settings.entra_tenant_id and settings.entra_client_id:
+        raise PermissionError("Setup can only be reopened without authentication when Entra config is missing.")
 
     Path(settings.setup_lock_path).unlink(missing_ok=True)
     return setup_status(settings)

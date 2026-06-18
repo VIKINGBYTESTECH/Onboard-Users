@@ -7,7 +7,7 @@ from fastapi import Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, RedirectResponse
 
-from .admin_auth import require_user_administrator
+from .admin_auth import require_user_administrator, require_user_administrator_when_configured
 from .config import get_settings
 from .graph import GraphProvisioner
 from .options import OnboardingOptions, load_options, save_options
@@ -157,7 +157,7 @@ def config() -> dict[str, object]:
 
 
 @app.get("/api/options", response_model=OnboardingOptions)
-def options() -> OnboardingOptions:
+def options(_: dict = Depends(require_user_administrator_when_configured)) -> OnboardingOptions:
     return load_options(settings)
 
 
@@ -212,12 +212,18 @@ def update_admin_options(
 
 
 @app.post("/api/onboarding/preview", response_model=OnboardingReport)
-def preview(request: OnboardingRequest) -> OnboardingReport:
+def preview(
+    request: OnboardingRequest,
+    _: dict = Depends(require_user_administrator_when_configured),
+) -> OnboardingReport:
     return build_report(request, settings, include_password=False)
 
 
 @app.post("/api/onboarding/run", response_model=OnboardingReport)
-async def run(request: OnboardingRequest) -> OnboardingReport:
+async def run(
+    request: OnboardingRequest,
+    _: dict = Depends(require_user_administrator_when_configured),
+) -> OnboardingReport:
     report = build_report(request, settings, include_password=True)
     if report.errors or not request.approvals.execute:
         report.status = STATUS_WAITING

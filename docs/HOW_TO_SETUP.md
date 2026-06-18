@@ -245,6 +245,8 @@ Expected response:
 
 ## 10. Test The App Safely
 
+After Entra tenant ID and client ID are configured, the app requires Microsoft sign-in before users can access onboarding or admin pages. The signed-in user must have `User Administrator` or `Global Administrator`.
+
 Start with preview mode:
 
 1. Open `https://localhost:5174`.

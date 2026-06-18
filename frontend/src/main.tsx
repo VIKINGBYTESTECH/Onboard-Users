@@ -144,6 +144,23 @@ async function api<T>(path: string, options: RequestInit = {}, token?: string): 
   throw new Error(errors.join("\n"));
 }
 
+async function microsoftSignIn(config: Config): Promise<{ account: AccountInfo | null; token: string }> {
+  if (!config.entra_client_id || !config.entra_tenant_id) {
+    throw new Error("Microsoft-login krever ENTRA_CLIENT_ID og ENTRA_TENANT_ID.");
+  }
+  const msal = new PublicClientApplication({
+    auth: {
+      clientId: config.entra_client_id,
+      authority: `https://login.microsoftonline.com/${config.entra_tenant_id}`,
+      redirectUri: window.location.origin,
+    },
+    cache: { cacheLocation: "sessionStorage" },
+  });
+  await msal.initialize();
+  const response = await msal.loginPopup({ scopes: ["openid", "profile", "email"] });
+  return { account: response.account, token: response.idToken };
+}
+
 function App() {
   const [employee, setEmployee] = useState<Employee>(emptyEmployee);
   const [approvals, setApprovals] = useState<Approvals>({
@@ -158,6 +175,8 @@ function App() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [view, setView] = useState<"onboarding" | "admin">("onboarding");
+  const [authAccount, setAuthAccount] = useState<AccountInfo | null>(null);
+  const [authToken, setAuthToken] = useState("");
 
   useEffect(() => {
     api<SetupStatus>("/api/setup/status").then((status) => {
@@ -166,11 +185,18 @@ function App() {
       applyOptions(status.options);
     }).catch((err) => setError(String(err)));
     api<Config>("/api/config").then(setConfig).catch((err) => setError(String(err)));
-    api<Options>("/api/options").then((data) => {
+  }, []);
+
+  const authRequired = Boolean(config?.admin_auth_available && !setupStatus?.needs_setup);
+
+  useEffect(() => {
+    if (!config || setupStatus?.needs_setup) return;
+    if (authRequired && !authToken) return;
+    api<Options>("/api/options", {}, authToken || undefined).then((data) => {
       setOptions(data);
       applyOptions(data);
     }).catch((err) => setError(String(err)));
-  }, []);
+  }, [authRequired, authToken, config, setupStatus?.needs_setup]);
 
   function applyOptions(data: Options) {
     setEmployee((current) => ({
@@ -200,7 +226,7 @@ function App() {
       const data = await api<Report>(`/api/onboarding/${mode}`, {
         method: "POST",
         body: JSON.stringify({ employee, approvals }),
-      });
+      }, authToken || undefined);
       setReport(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -235,11 +261,25 @@ function App() {
 
       {setupStatus?.needs_setup ? (
         <SetupWizard initialOptions={setupStatus.options} onSaved={(status) => setSetupStatus(status)} />
+      ) : authRequired && !authToken && config ? (
+        <LoginGate
+          config={config}
+          onAuthenticated={({ account, token }) => {
+            setAuthAccount(account);
+            setAuthToken(token);
+          }}
+        />
       ) : (
       <>
         {view === "admin" ? (
           <AdminPage
             config={config}
+            authAccount={authAccount}
+            authToken={authToken}
+            onAuthenticated={({ account, token }) => {
+              setAuthAccount(account);
+              setAuthToken(token);
+            }}
             onOptionsSaved={(saved) => setOptions(saved)}
             onSetupReopened={(status) => setSetupStatus(status)}
           />
@@ -506,42 +546,84 @@ function SetupWizard({ initialOptions, onSaved }: { initialOptions: Options; onS
   );
 }
 
+function LoginGate({
+  config,
+  onAuthenticated,
+}: {
+  config: Config;
+  onAuthenticated: (auth: { account: AccountInfo | null; token: string }) => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  async function signIn() {
+    setBusy(true);
+    setError("");
+    try {
+      onAuthenticated(await microsoftSignIn(config));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <section className="admin-layout">
+      <section className="panel login-panel">
+        <div className="mark">
+          <ShieldCheck size={22} />
+        </div>
+        <h2>Microsoft-pålogging kreves</h2>
+        <p>Appen er koblet til Entra. Logg inn med en bruker som har rollen User Administrator eller Global Administrator.</p>
+        <button className="primary" onClick={signIn} disabled={busy}>
+          {busy ? <Loader2 className="spin" size={17} /> : <ShieldCheck size={17} />}
+          Logg inn med Microsoft
+        </button>
+        {error && <div className="error">{error}</div>}
+      </section>
+    </section>
+  );
+}
+
 function AdminPage({
   config,
+  authAccount,
+  authToken,
+  onAuthenticated,
   onOptionsSaved,
   onSetupReopened,
 }: {
   config: Config | null;
+  authAccount: AccountInfo | null;
+  authToken: string;
+  onAuthenticated: (auth: { account: AccountInfo | null; token: string }) => void;
   onOptionsSaved: (options: Options) => void;
   onSetupReopened: (status: SetupStatus) => void;
 }) {
-  const [account, setAccount] = useState<AccountInfo | null>(null);
-  const [token, setToken] = useState("");
   const [options, setOptions] = useState<Options | null>(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const authReady = Boolean(config?.admin_auth_available);
 
+  useEffect(() => {
+    if (!authReady || !authToken) return;
+    api<Options>("/api/admin/options", {}, authToken)
+      .then(setOptions)
+      .catch((err) => setError(err instanceof Error ? err.message : String(err)));
+  }, [authReady, authToken]);
+
   async function signIn() {
     setError("");
-    if (!config?.entra_client_id || !config.entra_tenant_id) {
-      setError("Admin-login krever ENTRA_CLIENT_ID og ENTRA_TENANT_ID i backend.");
+    if (!config) {
+      setError("Admin-login krever backend-konfigurasjon.");
       return;
     }
-    const msal = new PublicClientApplication({
-      auth: {
-        clientId: config.entra_client_id,
-        authority: `https://login.microsoftonline.com/${config.entra_tenant_id}`,
-        redirectUri: window.location.origin,
-      },
-      cache: { cacheLocation: "sessionStorage" },
-    });
-    await msal.initialize();
-    const response = await msal.loginPopup({ scopes: ["openid", "profile", "email"] });
-    setAccount(response.account);
-    setToken(response.idToken);
-    const loaded = await api<Options>("/api/admin/options", {}, response.idToken);
-    setOptions(loaded);
+    try {
+      onAuthenticated(await microsoftSignIn(config));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    }
   }
 
   async function save() {
@@ -551,7 +633,7 @@ function AdminPage({
     const saved = await api<Options>(
       "/api/admin/options",
       { method: "PUT", body: JSON.stringify(options) },
-      token,
+      authToken,
     );
     setOptions(saved);
     onOptionsSaved(saved);
@@ -579,7 +661,7 @@ function AdminPage({
           </div>
           <button className="primary" onClick={signIn} disabled={!authReady}>
             <ShieldCheck size={17} />
-            {account ? account.name || "Innlogget" : "Logg inn med Microsoft"}
+            {authAccount ? authAccount.name || "Innlogget" : "Logg inn med Microsoft"}
           </button>
         </div>
         {!authReady && (

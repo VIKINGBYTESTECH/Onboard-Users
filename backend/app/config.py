@@ -29,6 +29,7 @@ class Settings(BaseSettings):
     setup_lock_path: str = ".setup-complete"
     backend_env_path: str = ".env"
     user_administrator_role_template_id: str = "fe930be7-5e62-47db-91af-98c3a49a38b1"
+    global_administrator_role_template_id: str = "62e90394-69f5-4237-9190-012177145e10"
 
     @property
     def graph_configured(self) -> bool:

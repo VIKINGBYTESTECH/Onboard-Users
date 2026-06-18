@@ -68,8 +68,19 @@ def require_user_administrator(
     app_roles = claims.get("roles", [])
     has_user_admin = (
         settings.user_administrator_role_template_id in directory_roles
+        or settings.global_administrator_role_template_id in directory_roles
         or "User Administrator" in app_roles
+        or "Global Administrator" in app_roles
     )
     if not has_user_admin:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User Administrator role required.")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User Administrator or Global Administrator role required.")
     return claims
+
+
+def require_user_administrator_when_configured(
+    authorization: str | None = Header(default=None),
+    settings: Settings = Depends(get_settings),
+) -> dict:
+    if not settings.entra_tenant_id or not settings.entra_client_id:
+        return {"name": "Setup mode", "roles": []}
+    return require_user_administrator(authorization, settings)
