@@ -41,7 +41,6 @@ ENTRA_CLIENT_ID=your-public-client-or-spa-app-client-id
 Add the app URL as a SPA redirect URI in Entra, for example:
 
 - `http://localhost:5174`
-- `http://100.112.148.9:5174`
 
 ## Microsoft Entra Setup
 
